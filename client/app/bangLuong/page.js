@@ -1,0 +1,135 @@
+'use client'
+import { Calculator, Wallet } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import mainLayoutComp from '../../components/mainLayout'
+import api from '../../lib/api'
+const MainLayout = mainLayoutComp
+export default function BangLuongPage() {
+  const [list, setList] = useState([])
+  const [bacSiList, setBacSiList] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [calcModal, setCalcModal] = useState(false)
+  const [form, setForm] = useState({ bacSiId: '', thang: new Date().getMonth() + 1, nam: new Date().getFullYear() })
+  const [result, setResult] = useState(null)
+  const [calculating, setCalculating] = useState(false)
+  const [user, setUser] = useState(null)
+  const load = () => { setLoading(true); api.get('/bangLuong').then((r) => { setList(r.data); setLoading(false) }) }
+  useEffect(() => { 
+    load(); 
+    api.get('/bacSi').then((r) => setBacSiList(r.data)) 
+    const stored = localStorage.getItem('user')
+    if (stored) setUser(JSON.parse(stored))
+  }, [])
+  const handleCalc = async (e) => {
+    e.preventDefault()
+    if (!form.bacSiId) return alert('Chọn Bác Sĩ')
+    setCalculating(true); setResult(null)
+    try { const r = await api.post('/bangLuong/tinh', form); setResult(r.data); load() } catch (e) { alert(e.response?.data?.error || 'Lỗi') } finally { setCalculating(false) }
+  }
+  const handlePay = async (id) => { if (!confirm('Xác Nhận Đã Thanh Toán Lương?')) return; await api.put(`/bangLuong/${id}/thanhToan`); load() }
+  const f = (k) => (e) => setForm((prev) => ({ ...prev, [k]: e.target.value }))
+  const fmtVnd = (n) => new Intl.NumberFormat('vi-VN').format(n || 0) + ' ₫'
+  const inputCls = 'w-full rounded border border-green-950 px-4 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-950 placeholder:text-gray-400'
+  const labelCls = 'block text-sm font-medium text-gray-700 mb-1'
+  return (
+    <MainLayout
+      title="Bảng Lương Bác Sĩ"
+      actions={
+        user?.vaiTro === 'admin' && (
+          <button onClick={() => { setCalcModal(true); setResult(null) }} className="cursor-pointer inline-flex items-center gap-2 rounded border-2 border-green-950 bg-green-950 px-4 py-2 text-sm font-semibold text-white transition-all hover:bg-white hover:text-green-950">
+            <Calculator size={16}/>Tính Lương Cho Tháng
+          </button>
+        )
+      }
+    >
+      <div className="bg-white border-2 border-green-950 rounded overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+        {loading ? (
+          <div className="flex justify-center items-center h-48"><div className="w-6 h-6 border-2 border-green-950 border-t-transparent rounded-full animate-spin"/></div>
+        ) : list.length === 0 ? (
+          <div className="flex flex-col items-center justify-center h-48 text-gray-500">
+            <Wallet size={40} className="mb-3 text-green-950/50"/>
+            <p className="text-sm font-medium">Chưa Có Bảng Lương</p>
+            {user?.vaiTro === 'admin' && <p className="text-xs mt-1 text-gray-400">Nhấn "Tính Lương" Để Tạo Cho Bác Sĩ</p>}
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left">
+              <thead>
+                <tr className="border-b border-gray-100 bg-gray-50 text-gray-500">
+                  <th className="px-6 py-4 text-xs font-semibold tracking-wider">Tháng/Năm</th>
+                  <th className="px-6 py-4 text-xs font-semibold tracking-wider">Bác Sĩ</th>
+                  <th className="px-6 py-4 text-xs font-semibold tracking-wider">Lương Cứng</th>
+                  <th className="px-6 py-4 text-xs font-semibold tracking-wider">Hoa Hồng</th>
+                  <th className="px-6 py-4 text-xs font-semibold tracking-wider">Tổng Lương</th>
+                  <th className="px-6 py-4 text-xs font-semibold tracking-wider">Trạng Thái</th>
+                  {user?.vaiTro === 'admin' && <th className="px-6 py-4 text-xs font-semibold tracking-wider text-right">Thao Tác</th>}
+                </tr>
+              </thead>
+              <tbody>
+                {list.map((bl) => (
+                  <tr key={bl.id} className="border-b border-gray-50 last:border-0 hover:bg-gray-50 transition-colors">
+                    <td className="px-6 py-4 text-sm font-semibold">{bl.thang}/{bl.nam}</td>
+                    <td className="px-6 py-4 text-sm font-medium text-gray-900">{bl.tenBacSi}</td>
+                    <td className="px-6 py-4 text-sm text-gray-500">{fmtVnd(bl.luongCo)}</td>
+                    <td className="px-6 py-4 text-sm text-green-600">{fmtVnd(bl.hoaHong)}</td>
+                    <td className="px-6 py-4 text-sm font-bold text-green-950">{fmtVnd(bl.tongLuong)}</td>
+                    <td className="px-6 py-4"><span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${bl.trangThai === 'daThanhToan' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>{bl.trangThai === 'daThanhToan' ? 'Đã Thanh Toán' : 'Chưa Trả'}</span></td>
+                    {user?.vaiTro === 'admin' && (
+                      <td className="px-6 py-4 text-right">
+                        {bl.trangThai !== 'daThanhToan' && (
+                          <button onClick={() => handlePay(bl.id)} className="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 bg-green-50 text-green-700 text-xs font-semibold rounded hover:bg-green-100 transition-colors">
+                            <Wallet size={14}/>Thanh Toán Ngay
+                          </button>
+                        )}
+                      </td>
+                    )}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+      {calcModal && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={() => setCalcModal(false)}>
+          <div className="bg-white border-2 border-green-950 rounded p-6 w-full max-w-md shadow-2xl" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-100">
+              <h2 className="text-xl font-semibold text-gray-900">Tính Lương Bác Sĩ</h2>
+              <button onClick={() => setCalcModal(false)} className="cursor-pointer w-8 h-8 rounded-full flex items-center justify-center text-gray-400 hover:bg-gray-100 hover:text-gray-900 transition-colors">✕</button>
+            </div>
+            <form onSubmit={handleCalc}>
+              <div className="flex flex-col gap-4 mb-6">
+                <div><label className={labelCls}>Bác Sĩ *</label><select required className={inputCls} value={form.bacSiId} onChange={f('bacSiId')}><option value="">Chọn Bác Sĩ</option>{bacSiList.map((bs) => <option key={bs.id} value={bs.id}>{bs.hoTen}</option>)}</select></div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div><label className={labelCls}>Tháng</label><select className={inputCls} value={form.thang} onChange={f('thang')}>{Array.from({ length: 12 }, (_, i) => <option key={i + 1} value={i + 1}>Tháng {i + 1}</option>)}</select></div>
+                  <div><label className={labelCls}>Năm</label><input required className={inputCls} type="number" value={form.nam} onChange={f('nam')}/></div>
+                </div>
+              </div>
+              {result && (
+                <div className="bg-green-50/50 border border-green-100 rounded p-5 mb-5 shadow-sm">
+                  <div className="text-sm font-semibold text-green-900 mb-4 border-b border-green-100 pb-2">Kết Quả Tính Toán</div>
+                  <div className="flex flex-col gap-3 text-sm">
+                    <div className="flex justify-between"><span className="text-gray-600">Doanh Thu Bác Sĩ Đem Lại</span><span className="font-medium text-gray-900">{fmtVnd(result.doanhThu)}</span></div>
+                    <div className="flex justify-between"><span className="text-gray-600">Mức Lương Cố Định</span><span className="font-medium text-gray-900">{fmtVnd(result.luongCo)}</span></div>
+                    <div className="flex justify-between"><span className="text-gray-600">Hoa Hồng Chia Sẻ</span><span className="font-semibold text-green-600">{fmtVnd(result.hoaHong)}</span></div>
+                    <div className="border-t border-green-200 mt-2 pt-3 flex justify-between items-center text-base">
+                      <span className="font-semibold text-gray-900">Tổng Lương Ghi Nhận</span>
+                      <span className="font-bold text-green-950 text-lg">{fmtVnd(result.tongLuong)}</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+              <div className="flex justify-end gap-3 pt-5 border-t border-gray-100">
+                <button type="button" onClick={() => setCalcModal(false)} className="cursor-pointer px-4 py-2 rounded text-sm font-medium text-gray-600 hover:bg-gray-100 transition-colors">Đóng</button>
+                <button type="submit" disabled={calculating} className="cursor-pointer inline-flex items-center gap-2 rounded border-2 border-green-950 bg-green-950 px-4 py-2 text-sm font-semibold text-white transition-all hover:bg-white hover:text-green-950 disabled:opacity-50">
+                  <Calculator size={16}/>
+                  {calculating ? 'Đang Phân Tích...' : 'Bắt Đầu Tính Lương'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </MainLayout>
+  )
+}
