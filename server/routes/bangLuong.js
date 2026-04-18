@@ -6,17 +6,17 @@ router.get('/', (req, res) => {
     SELECT bl.*, bs.hoTen as tenBacSi
     FROM bangLuong bl
     JOIN bacSi bs ON bl.bacSiId = bs.id
-    ${req.user?.vaiTro === 'bacSi' ? 'WHERE bl.bacSiId = ?' : ''}
+    ${(req.user?.vaiTro === 'bacSi' || req.user?.vaiTro === 'leTan') ? 'WHERE bl.bacSiId = ?' : ''}
     ORDER BY bl.nam DESC, bl.thang DESC
   `
-  const rows = db.prepare(query).all(...(req.user?.vaiTro === 'bacSi' ? [req.user.bacSiId] : []))
+  const rows = db.prepare(query).all(...((req.user?.vaiTro === 'bacSi' || req.user?.vaiTro === 'leTan') ? [req.user.bacSiId] : []))
   res.json(rows)
 })
 router.post('/tinh', (req, res) => {
   const { bacSiId, thang, nam } = req.body
   if (!bacSiId || !thang || !nam) return res.status(400).json({ error: 'Thiếu Thông Tin' })
   const bacSi = db.prepare('SELECT * FROM bacSi WHERE id = ?').get(bacSiId)
-  if (!bacSi) return res.status(404).json({ error: 'Không Tìm Thấy Bác Sĩ' })
+  if (!bacSi) return res.status(404).json({ error: 'Không Tìm Thấy Nhân Viên' })
   const doanhThu = db.prepare(`
     SELECT COALESCE(SUM(ct.thanhTien), 0) as tong
     FROM chiTietHoaDon ct

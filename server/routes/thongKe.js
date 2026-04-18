@@ -42,6 +42,15 @@ router.get('/tongQuan', (req, res) => {
     ORDER BY doanhThu DESC
     LIMIT 5
   `).all()
+  const queryLuong = `
+    SELECT COALESCE(SUM(tongLuong), 0) as tong
+    FROM bangLuong
+    WHERE trangThai = 'daThanhToan'
+    ${thang ? `AND thang = ${thang}` : ''}
+    ${nam ? `AND nam = ${nam}` : ''}
+  `
+  const luongDaTra = prepare(queryLuong).get()
+  const nhanSuHoatDong = prepare(`SELECT COUNT(*) as tong FROM bacSi WHERE trangThai = 'hoatDong'`).get()
   const lichHenTheoThang = prepare(`
     SELECT strftime('%m', ngayGio) as thang, COUNT(*) as soLuong
     FROM lichHen
@@ -50,6 +59,16 @@ router.get('/tongQuan', (req, res) => {
     GROUP BY thang
     ORDER BY thang
   `).all()
-  res.json({ doanhThu: thucThu.tong, phatSinh: phatSinh.tong, benhNhanMoi: benhNhanMoi.tong, soDichVuTheoNhom, topBacSi, lichHenTheoThang })
+  res.json({
+    thucThu: thucThu.tong,
+    phatSinh: phatSinh.tong,
+    benhNhanMoi: benhNhanMoi.tong,
+    luongDaTra: luongDaTra.tong,
+    loiNhuanRong: thucThu.tong - luongDaTra.tong,
+    nhanSuHoatDong: nhanSuHoatDong.tong,
+    soDichVuTheoNhom,
+    topBacSi,
+    lichHenTheoThang
+  })
 })
 export default router

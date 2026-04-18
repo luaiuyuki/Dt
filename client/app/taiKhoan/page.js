@@ -193,18 +193,18 @@ export default function TaiKhoanPage() {
                   <option value="admin">Quản Trị Viên</option>
                 </select>
               </div>
-              {formData.vaiTro === 'bacSi' && (
+              {(formData.vaiTro === 'bacSi' || formData.vaiTro === 'leTan') && (
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-700">Liên Kết Hồ Sơ Bác Sĩ <span className="text-gray-400 font-normal text-xs">(Xác Định Tài Khoản Này Thuộc Về Bác Sĩ Nào)</span></label>
+                  <label className="mb-1 block text-sm font-medium text-gray-700">Liên Kết Hồ Sơ Nhân Viên <span className="text-gray-400 font-normal text-xs">(Xác Định Tài Khoản Này Thuộc Về Ai)</span></label>
                   <select
                     required
                     value={formData.bacSiId || ''}
                     onChange={(e) => setFormData({ ...formData, bacSiId: e.target.value })}
                     className="w-full rounded border border-green-950 px-4 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-950"
                   >
-                    <option value="">-- Chọn Bác Sĩ --</option>
+                    <option value="">-- Chọn Nhân Viên --</option>
                     {doctors.map(d => (
-                      <option key={d.id} value={d.id}>{d.hoTen}</option>
+                      <option key={d.id} value={d.id}>{d.hoTen} ({d.loaiNhanVien === 'bacSi' ? 'Bác Sĩ' : 'Lễ Tân'})</option>
                     ))}
                   </select>
                 </div>

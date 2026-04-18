@@ -32,7 +32,7 @@ const allNavGroups = [
     label: 'Quản Lý',
     roles: ['admin'],
     items: [
-      { href: '/bacSi', label: 'Bác Sĩ', icon: Stethoscope },
+      { href: '/bacSi', label: 'Nhân Sự', icon: Stethoscope },
       { href: '/dichVu', label: 'Dịch Vụ & Phí', icon: Activity },
     ],
   },
@@ -48,7 +48,7 @@ const allNavGroups = [
     roles: ['admin', 'leTan', 'bacSi'],
     items: [
       { href: '/hoaDon', label: 'Hóa Đơn', icon: Receipt, roles: ['admin', 'leTan'] },
-      { href: '/bangLuong', label: 'Bảng Lương', icon: Wallet, roles: ['admin', 'bacSi'] },
+      { href: '/bangLuong', label: 'Bảng Lương', icon: Wallet, roles: ['admin', 'bacSi', 'leTan'] },
       { href: '/thongKe', label: 'Báo Cáo & Thống Kê', icon: BarChart3, roles: ['admin'] },
     ],
   },

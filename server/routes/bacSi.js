@@ -7,22 +7,22 @@ router.get('/', (req, res) => {
 })
 router.get('/:id', (req, res) => {
   const row = db.prepare('SELECT * FROM bacSi WHERE id = ?').get(req.params.id)
-  if (!row) return res.status(404).json({ error: 'Không Tìm Thấy Bác Sĩ' })
+  if (!row) return res.status(404).json({ error: 'Không Tìm Thấy Nhân Viên' })
   res.json(row)
 })
 router.post('/', (req, res) => {
-  const { hoTen, chuyenKhoa, soDienThoai, email, luongCo, tyLeHoaHong, ngayBatDau } = req.body
-  if (!hoTen) return res.status(400).json({ error: 'Tên Bác Sĩ Là Bắt Buộc' })
+  const { hoTen, chuyenKhoa, soDienThoai, email, luongCo, tyLeHoaHong, ngayBatDau, loaiNhanVien } = req.body
+  if (!hoTen) return res.status(400).json({ error: 'Tên Nhân Viên Là Bắt Buộc' })
   const result = db.prepare(`
-    INSERT INTO bacSi (hoTen, chuyenKhoa, soDienThoai, email, luongCo, tyLeHoaHong, ngayBatDau)
-    VALUES (?, ?, ?, ?, ?, ?, ?)
-  `).run(hoTen, chuyenKhoa, soDienThoai, email, luongCo || 0, tyLeHoaHong || 0, ngayBatDau)
+    INSERT INTO bacSi (hoTen, chuyenKhoa, soDienThoai, email, luongCo, tyLeHoaHong, ngayBatDau, loaiNhanVien)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+  `).run(hoTen, chuyenKhoa, soDienThoai, email, luongCo || 0, tyLeHoaHong || 0, ngayBatDau, loaiNhanVien || 'bacSi')
   res.status(201).json({ id: result.lastInsertRowid, hoTen })
 })
 router.put('/:id', (req, res) => {
   const fields = []
   const params = []
-  const allowed = ['hoTen', 'chuyenKhoa', 'soDienThoai', 'email', 'luongCo', 'tyLeHoaHong', 'ngayBatDau', 'trangThai']
+  const allowed = ['hoTen', 'chuyenKhoa', 'soDienThoai', 'email', 'luongCo', 'tyLeHoaHong', 'ngayBatDau', 'trangThai', 'loaiNhanVien']
   allowed.forEach(key => {
     if (req.body[key] !== undefined) {
       fields.push(`${key} = ?`)

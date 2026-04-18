@@ -16,6 +16,7 @@ db.exec(`
     luongCo REAL DEFAULT 0,
     tyLeHoaHong REAL DEFAULT 0,
     ngayBatDau TEXT,
+    loaiNhanVien TEXT DEFAULT 'bacSi',
     trangThai TEXT DEFAULT 'hoatDong',
     createdAt TEXT DEFAULT (datetime('now','localtime'))
   );

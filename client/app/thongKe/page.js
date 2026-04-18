@@ -41,9 +41,9 @@ export default function ThongKePage() {
         </div>
       }
     >
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-5 mb-7">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-5 mb-7">
         {loading ? (
-          <><Skeleton/><Skeleton/><Skeleton/><Skeleton/><Skeleton/></>
+          <><Skeleton/><Skeleton/><Skeleton/><Skeleton/><Skeleton/><Skeleton/></>
         ) : (
           <>
             <div className="bg-white border-2 border-green-950 rounded p-5 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
@@ -61,6 +61,20 @@ export default function ThongKePage() {
               <div className="text-sm font-medium text-gray-500 mt-1">Thực Thu (Đã Thu)</div>
             </div>
             <div className="bg-white border-2 border-green-950 rounded p-5 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+              <div className="w-12 h-12 bg-red-50 rounded-full flex items-center justify-center mb-4 border border-red-100">
+                <DollarSign size={24} className="text-red-600"/>
+              </div>
+              <div className="text-xl font-bold text-gray-900 leading-tight">{fmtVnd(data?.luongDaTra)}</div>
+              <div className="text-sm font-medium text-gray-500 mt-1">Lương Đã Trả</div>
+            </div>
+            <div className="bg-white border-2 border-green-950 rounded p-5 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+              <div className="w-12 h-12 bg-emerald-50 rounded-full flex items-center justify-center mb-4 border border-emerald-100">
+                <TrendingUp size={24} className="text-emerald-600"/>
+              </div>
+              <div className="text-xl font-bold text-gray-900 leading-tight">{fmtVnd(data?.loiNhuanRong)}</div>
+              <div className="text-sm font-medium text-gray-500 mt-1">Lợi Nhuận Ròng</div>
+            </div>
+            <div className="bg-white border-2 border-green-950 rounded p-5 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
               <div className="w-12 h-12 bg-indigo-50 rounded-full flex items-center justify-center mb-4 border border-indigo-100">
                 <Users size={24} className="text-indigo-600"/>
               </div>
@@ -68,18 +82,11 @@ export default function ThongKePage() {
               <div className="text-sm font-medium text-gray-500 mt-1">Tổng Bệnh Nhân</div>
             </div>
             <div className="bg-white border-2 border-green-950 rounded p-5 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
-              <div className="w-12 h-12 bg-amber-50 rounded-full flex items-center justify-center mb-4 border border-amber-100">
-                <CalendarDays size={24} className="text-amber-600"/>
-              </div>
-              <div className="text-xl font-bold text-gray-900 leading-tight">{thangData.reduce((a, b) => a + b.count, 0)}</div>
-              <div className="text-sm font-medium text-gray-500 mt-1">Tổng Lượt Hẹn</div>
-            </div>
-            <div className="bg-white border-2 border-green-950 rounded p-5 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
               <div className="w-12 h-12 bg-purple-50 rounded-full flex items-center justify-center mb-4 border border-purple-100">
                 <Stethoscope size={24} className="text-purple-600"/>
               </div>
-              <div className="text-xl font-bold text-gray-900 leading-tight">{data?.topBacSi?.length || 0}</div>
-              <div className="text-sm font-medium text-gray-500 mt-1">Bác Sĩ Hoạt Động</div>
+              <div className="text-xl font-bold text-gray-900 leading-tight">{data?.nhanSuHoatDong || 0}</div>
+              <div className="text-sm font-medium text-gray-500 mt-1">Nhân Sự Hoạt Động</div>
             </div>
           </>
         )}
@@ -165,9 +172,9 @@ export default function ThongKePage() {
                       <td className="py-4 px-3">
                         <div className="flex items-center gap-3">
                           <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden border border-gray-200">
-                            <div className="h-full bg-green-950 rounded-full transition-all duration-500" style={{ width: `${data.thucThu ? Math.round((n.doanhThu / data.thucThu) * 100) : 0}%` }}/>
+                            <div className="h-full bg-green-950 rounded-full transition-all duration-500" style={{ width: `${data.phatSinh ? Math.round((n.doanhThu / data.phatSinh) * 100) : 0}%` }}/>
                           </div>
-                          <span className="text-xs font-semibold text-gray-500 w-9">{data.thucThu ? Math.round((n.doanhThu / data.thucThu) * 100) : 0}%</span>
+                          <span className="text-xs font-semibold text-gray-500 w-9">{data.phatSinh ? Math.round((n.doanhThu / data.phatSinh) * 100) : 0}%</span>
                         </div>
                       </td>
                     </tr>
